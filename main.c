@@ -28,7 +28,7 @@ bool hasNewData = false;
 
 void dacSet(uint16_t setVal, int cs)
 {
-    printf("%d at %d", setVal, cs);
+    printf("IO%d set to %d", cs,setVal);
     if (cs != 0)
     {
         uint8_t send[3];
@@ -85,7 +85,7 @@ void selectingDAC(int selectInt)
 void selectingVoltage(int selectVoltage)
 {
     
-    if (__INT16_MIN__ <= selectVoltage <= __INT16_MAX__)
+    if (__INT16_MIN__ <= selectVoltage <= 32767)
  
     {
         dacSet(selectVoltage, selectedDAC); // set Voltage
@@ -96,10 +96,9 @@ void selectingVoltage(int selectVoltage)
     else
     {
         printf("Voltage out of 16 bit (signed) range");
-        printf("%d",selectVoltage);
     }
 }
-//1,20001,2000
+//1,400000001,400000001,40000000
 void usbRead()
 {
     int usbCommsBufferindex = 0;
@@ -114,18 +113,14 @@ void usbRead()
         else if (hasNewData)
         {
             usbCommsBuffer[usbCommsBufferindex++] = ('\0' & 0xFF);
-
-            printf("\n");
-
             int x = atoi(usbCommsBuffer);
+            
             selectingDAC(x);
-            printf("%d /// ", x);
-
+            
             shiftLeft(usbCommsBuffer, 2);
 
             x = atoi(usbCommsBuffer);
 
-            printf("%d", x);
             selectingVoltage(x);
             hasNewData = false;
             usbCommsBufferindex = 0;
@@ -133,6 +128,7 @@ void usbRead()
         sleep_ms(10);
     }
 }
+
 
 int main()
 {
