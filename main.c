@@ -15,7 +15,7 @@
 #define CS2 1
 #define CS3 13 // DAC 1 : IO2 | DAC 2 : IO1 | DAC 3 : IO13
 
-#define SPI_PORT spi1//1,2000
+#define SPI_PORT spi1 // 1,2000
 
 #define USBCOMMSBUFFER_LENGTH 256
 #define __INT16_MIN__ -32768
@@ -28,7 +28,7 @@ bool hasNewData = false;
 
 void dacSet(uint16_t setVal, int cs)
 {
-    printf("IO%d set to %d", cs,setVal);
+    printf("IO%d set to %d", cs, setVal);
     if (cs != 0)
     {
         uint8_t send[3];
@@ -44,7 +44,6 @@ void dacSet(uint16_t setVal, int cs)
 
 void shiftLeft(char *string, int shiftLength)
 {
-
     int i, size = strlen(string);
     if (shiftLength >= size)
     {
@@ -84,9 +83,9 @@ void selectingDAC(int selectInt)
 
 void selectingVoltage(int selectVoltage)
 {
-    
+
     if (__INT16_MIN__ <= selectVoltage <= 32767)
- 
+
     {
         dacSet(selectVoltage, selectedDAC); // set Voltage
 
@@ -98,7 +97,7 @@ void selectingVoltage(int selectVoltage)
         printf("Voltage out of 16 bit (signed) range");
     }
 }
-//1,400000001,400000001,40000000
+// 1,400000001,400000001,40000000
 void usbRead()
 {
     int usbCommsBufferindex = 0;
@@ -114,9 +113,9 @@ void usbRead()
         {
             usbCommsBuffer[usbCommsBufferindex++] = ('\0' & 0xFF);
             int x = atoi(usbCommsBuffer);
-            
+
             selectingDAC(x);
-            
+
             shiftLeft(usbCommsBuffer, 2);
 
             x = atoi(usbCommsBuffer);
@@ -128,7 +127,6 @@ void usbRead()
         sleep_ms(10);
     }
 }
-
 
 int main()
 {
