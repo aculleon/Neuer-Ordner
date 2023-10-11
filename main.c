@@ -13,12 +13,19 @@
 
 #define CS1 2
 #define CS2 1
-#define CS3 13 // DAC 1 : IO2 | DAC 2 : IO1 | DAC 3 : IO13
+#define CS3 13
 
-#define SPI_PORT spi1 // 1,2000
+#define SPI_PORT spi1
 
 #define USBCOMMSBUFFER_LENGTH 256
+
 #define __INT16_MIN__ -32768
+
+//// ADC Currentsense PID controller
+//// freeRTOS einbinden: usb read
+////                     currentsource
+////                     tempCheck
+
 
 int selectedDAC = 0;
 int setVoltageDAC = 0;
@@ -26,9 +33,9 @@ int setVoltageDAC = 0;
 char usbCommsBuffer[USBCOMMSBUFFER_LENGTH];
 bool hasNewData = false;
 
-void dacSet(uint16_t setVal, int cs)
+void dacSet(int setVal, int cs)
 {
-    printf("IO%d set to %d", cs, setVal);
+    printf("IO%d set to %d", cs, setVal); //Debug mode
     if (cs != 0)
     {
         uint8_t send[3];
@@ -64,6 +71,7 @@ void selectingDAC(int selectInt)
     {
     case -1:
         reset_usb_boot(0, 0); // ignores following voltage
+        
         break;
     case 1:
         selectedDAC = CS1;
@@ -84,11 +92,10 @@ void selectingDAC(int selectInt)
 void selectingVoltage(int selectVoltage)
 {
 
-    if (__INT16_MIN__ <= selectVoltage <= 32767)
+    if (__INT16_MIN__+1 <= selectVoltage <= 32766)
 
     {
         dacSet(selectVoltage, selectedDAC); // set Voltage
-
         selectedDAC = 0;
         setVoltageDAC = 0; // restet selected
     }
@@ -97,7 +104,7 @@ void selectingVoltage(int selectVoltage)
         printf("Voltage out of 16 bit (signed) range");
     }
 }
-// 1,400000001,400000001,40000000
+// 1,40000000
 void usbRead()
 {
     int usbCommsBufferindex = 0;
@@ -131,6 +138,7 @@ void usbRead()
 int main()
 {
     stdio_init_all();
+    
 
     spi_init(spi1, 100 * 1000);
     spi_set_format(spi1, // SPI instance
@@ -154,7 +162,14 @@ int main()
     gpio_init(CS3);
     gpio_set_dir(CS3, GPIO_OUT);
     gpio_put(CS3, 1); // Disable CS on startup
-
+    int16_t b = 0;
+    for (int i = 0; i < 200; i++)
+    {
+        dacSet(-5000+b,2); //1,-30000      -1    
+        b+=50;
+        sleep_ms(100);
+    }
+    dacSet(0,2);
     while (true)
     {
         usbRead();

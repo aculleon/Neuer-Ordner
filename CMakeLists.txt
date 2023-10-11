@@ -22,6 +22,7 @@ target_link_libraries(${PROJECT_NAME}
     hardware_uart
     hardware_spi
     hardware_i2c
+    hardware_resets
 
 )
 # Enable usb output, disable uart output
